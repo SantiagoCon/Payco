@@ -40,7 +40,7 @@ ROUTER.delete('/deleteUser', (req, res)=>{
  //Servicios REST para clientes
  ROUTER.post('/createClient', (req, res)=>{
   webServices.createClient(req.body.name, req.body.lastName, req.body.user, req.body.pass, req.body.active,
-    req.body.level).then((data)=>{
+    req.body.email, req.body.phone, req.body.documento).then((data)=>{
           res.status(200);
           res.json({message: 'Client created succesfully'});
       }).catch((err)=>{
@@ -51,7 +51,7 @@ ROUTER.delete('/deleteUser', (req, res)=>{
 });
 ROUTER.put('/updateClient', (req, res)=>{
   webServices.updateClient(req.body.name, req.body.lastName, req.body.user, req.body.pass, req.body.active,
-    req.body.level).then((data)=>{
+    req.body.email, req.body.phone, req.body.documento).then((data)=>{
           res.status(200);
           res.json({message: 'Client updated succesfully'});
       }).catch((err)=>{
@@ -68,6 +68,18 @@ ROUTER.delete('/deleteClient', (req, res)=>{
           console.log(err);
           res.status(500);
           res.json({ message: "Error when deleting Client" });
+      });
+});
+
+//Recargar billetera
+ROUTER.put('/updateWallet', (req, res)=>{
+  webServices.updateWallet(req.body.phone, req.body.documento, req.body.amount).then((data)=>{
+          res.status(200);
+          res.json({message: 'Wallet updated succesfully'});
+      }).catch((err)=>{
+          console.log(err);
+          res.status(500);
+          res.json({ message: "Error when updating Wallet" });
       });
 });
 exports.router = ROUTER;
