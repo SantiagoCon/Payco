@@ -45,7 +45,7 @@ exports.deleteUser = (id) => {
 };
 
 //Recargar billetera
-exports.updateUser = async(phone, documento, amount) => {
+exports.updateWallet = async(phone, documento, amount) => {
   //***************************** VARIABLES LOCALES *******************************
   var hoy = new Date();         //Obtiene la fecha y hora actual                  *
   var dd = hoy.getDate();       //Guarda el número de día                         *
@@ -67,4 +67,8 @@ exports.updateUser = async(phone, documento, amount) => {
   await webModel.updateWallet(phone, documento, amount+amountNow[0].amount);
   let walletId=await webModel.getIdWalletByPhone(phone, documento);
   return webModel.addNewMov(walletId[0].id, amount+amountNow[0].amount, "charge account", 0, timestap, 1);
+};
+//consultar saldo
+exports.getCash =(phone, documento) => {
+  return webModel.getAmount(phone, documento);
 };

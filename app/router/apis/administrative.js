@@ -82,6 +82,17 @@ ROUTER.put('/updateWallet', (req, res)=>{
           res.json({ message: "Error when updating Wallet" });
       });
 });
+//consultar saldo
+ROUTER.get('/getCash', (req, res)=>{
+  webServices.getCash(req.body.phone, req.body.documento).then((data)=>{
+          res.status(200);
+          res.json({amount: data[0].amount });
+      }).catch((err)=>{
+          console.log(err);
+          res.status(500);
+          res.json({ message: "Error when updating Wallet" });
+      });
+});
 exports.router = ROUTER;
 
 
