@@ -1,6 +1,7 @@
 fs = require('fs'); // Guardar las imagenes en el servidor                                            
 let moment = require('moment-timezone'); //Libreria para obtener tiempo segun zona horaria            
-let webModel = require('../model/web_model'); //Importa de administrative_model                       
+let webModel = require('../model/web_model'); //Importa de administrative_model
+var mail = require('../helpers/mail');                       
 //Servicios para apis del cliente
 exports.createClient = async(name, lastName, user, pass, active, mail, phone, documento) => {
   //***************************** VARIABLES LOCALES *******************************
@@ -71,4 +72,61 @@ exports.updateWallet = async(phone, documento, amount) => {
 //consultar saldo
 exports.getCash =(phone, documento) => {
   return webModel.getAmount(phone, documento);
+};
+//pagar 
+exports.newMovement = async(walletId, amount) => {
+  //***************************** VARIABLES LOCALES *******************************
+  var hoy = new Date();         //Obtiene la fecha y hora actual                  *
+  var dd = hoy.getDate();       //Guarda el número de día                         *
+  var mm = hoy.getMonth() + 1;  //Guarda el mes                                   *
+  var yyyy = hoy.getFullYear(); //Guarda el año                                   *
+  var h = hoy.getHours();       //Guarda las horas                                *
+  var m = hoy.getMinutes();     //Guarda los minutos                              *
+  var s = hoy.getSeconds();     //Guarda los segundos                             *
+  var horaActual = "";          //Cadena con la fecha y hora actuales             *
+  var today = "";               //Fecha y hora actuales                           *
+  var timestap = "";            //Guarda la fecha actual con formato específico   *
+  //*******************************************************************************
+  if (dd < 10) dd = '0' + dd;
+  if (mm < 10) mm = '0' + mm;
+  today = yyyy + '-' + mm + '-' + dd;
+  horaActual = h + ":" + m + ":" + s;
+  timestap = moment(today + " " + horaActual, 'YYYY-MM-DD HH:mm:ss').tz('America/Chihuahua').format('YYYY-MM-DD HH:mm:ss');
+  var email = await webModel.getInfoByWalletId(walletId);
+  var token = Math.round( Math.random() * 999999 );
+  await webModel.addNewMov(walletId, amount, token, 1, timestap, 0);
+  let id = await webModel.getLastIdWallet();
+  return mail.sendToken.sendEmail(
+   email[0].mail,
+   'Confirmacion de compra',
+    email[0].name,
+    token,
+    id
+    );
+  
+   
+};
+
+exports.makePayment = async(token, idMovement) => {
+  //***************************** VARIABLES LOCALES *******************************
+  var hoy = new Date();         //Obtiene la fecha y hora actual                  *
+  var dd = hoy.getDate();       //Guarda el número de día                         *
+  var mm = hoy.getMonth() + 1;  //Guarda el mes                                   *
+  var yyyy = hoy.getFullYear(); //Guarda el año                                   *
+  var h = hoy.getHours();       //Guarda las horas                                *
+  var m = hoy.getMinutes();     //Guarda los minutos                              *
+  var s = hoy.getSeconds();     //Guarda los segundos                             *
+  var horaActual = "";          //Cadena con la fecha y hora actuales             *
+  var today = "";               //Fecha y hora actuales                           *
+  var timestap = "";            //Guarda la fecha actual con formato específico   *
+  //*******************************************************************************
+  if (dd < 10) dd = '0' + dd;
+  if (mm < 10) mm = '0' + mm;
+  today = yyyy + '-' + mm + '-' + dd;
+  horaActual = h + ":" + m + ":" + s;
+  timestap = moment(today + " " + horaActual, 'YYYY-MM-DD HH:mm:ss').tz('America/Chihuahua').format('YYYY-MM-DD HH:mm:ss');
+  var amount = await webModel.getMovementtInfo(token, idMovement);
+  var amountNow = await webModel.getWalletInfo(amount[0].wallet_Id);
+  await webModel.updateWallet(amountNow[0].phone, amountNow[0].documento, amountNow[0].amount-amount[0].amount);
+  return webModel.updateMov(token, idMovement);
 };

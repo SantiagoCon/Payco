@@ -93,6 +93,39 @@ ROUTER.get('/getCash', (req, res)=>{
           res.json({ message: "Error when updating Wallet" });
       });
 });
+
+ROUTER.put('/updateWallet', (req, res)=>{
+  webServices.updateWallet(req.body.phone, req.body.documento, req.body.amount).then((data)=>{
+          res.status(200);
+          res.json({message: 'Wallet updated succesfully'});
+      }).catch((err)=>{
+          console.log(err);
+          res.status(500);
+          res.json({ message: "Error when updating Wallet" });
+      });
+});
+
+ROUTER.put('/newMovement',(req,res)=>{
+  webServices.newMovement( req.body.walletID, req.body.amount).then((data)=>{
+    res.status(200);
+    res.json({message: 'Wallet updated succesfully'});
+}).catch((err)=>{
+    console.log(err);
+    res.status(500);
+    res.json({ message: "Error when updating Wallet" });
+});
+});
+ROUTER.put('/makePayment',(req,res)=>{
+  webServices.makePayment( req.body.token, req.body.idMovement).then((data)=>{
+    res.status(200);
+    res.json({message: ' Payment make succesfully'});
+}).catch((err)=>{
+    console.log(err);
+    res.status(500);
+    res.json({ message: "Error when making Payment" });
+});
+});
+
 exports.router = ROUTER;
 
 

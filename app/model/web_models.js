@@ -42,7 +42,7 @@ exports.updateWallet = (phone, documento, amount) => {
   return connectionPool.query(statement,[amount, documento, phone ]);
 };
 exports.getLastIdWallet=()=>{
-  let statement = 'select id from pyco.wallets ORDER BY id DESC LIMIT 1'; 
+  let statement = 'select id from payco.wallets ORDER BY id DESC LIMIT 1'; 
   return connectionPool.query(statement)
 }
 exports.addNewMov = ( walletId, movements, desc, type, timestap, status) => {
@@ -52,10 +52,18 @@ exports.addNewMov = ( walletId, movements, desc, type, timestap, status) => {
 
 //Recargar billetera
 exports.getAmount=(phone, documento)=>{
-  let statement = 'select amount from pyco.wallets where documento=? and phone=?'; 
+  let statement = 'select amount from payco.wallets where documento=? and phone=?'; 
   return connectionPool.query(statement,[documento,phone])
 }
 exports.getIdWalletByPhone=(phone, documento)=>{
-  let statement = 'select id from pyco.wallets where documento=? and phone=?'; 
+  let statement = 'select id from payco.wallets where documento=? and phone=?'; 
   return connectionPool.query(statement,[documento,phone])
 }
+exports.getWalletInfo=(walletId)=>{
+  let statement = 'select * from payco.wallets where wallet_id=?'; 
+  return connectionPool.query(statement,[walletId])
+}
+exports.updateWallet = (token, idMovement) => {
+  let statement = 'update payco.movements set status=1 where token = ?, idMovement = ? ';
+  return connectionPool.query(statement,[token, idMovement]);
+};
