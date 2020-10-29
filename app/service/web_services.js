@@ -25,7 +25,8 @@ exports.createClient = async(name, lastName, user, pass, active, mail, phone, do
   let idClient= await webModel.getLastIdClient();
   await webModel.createWallet(idClient[0].id, timestap);
   let walletId=await webModel.getLastIdWallet();
-  return webModel.addNewMov(walletId[0].id, 0, "Wallet created",0, timestap, 1);
+  await webModel.addNewMov(walletId[0].id, 0, "Wallet created",0, timestap, 1);
+  return walletId[0].id;
 };
 exports.updateClient = (name, lastName, user, pass, active, mail, phone, documento) => {
   return webModel.updateClient(name, lastName, user, pass, active, mail, phone, documento);
@@ -47,6 +48,7 @@ exports.deleteUser = (id) => {
 
 //Recargar billetera
 exports.updateWallet = async(phone, documento, amount) => {
+  console.log("actualizando billetera")
   //***************************** VARIABLES LOCALES *******************************
   var hoy = new Date();         //Obtiene la fecha y hora actual                  *
   var dd = hoy.getDate();       //Guarda el número de día                         *
@@ -64,14 +66,23 @@ exports.updateWallet = async(phone, documento, amount) => {
   today = yyyy + '-' + mm + '-' + dd;
   horaActual = h + ":" + m + ":" + s;
   timestap = moment(today + " " + horaActual, 'YYYY-MM-DD HH:mm:ss').tz('America/Chihuahua').format('YYYY-MM-DD HH:mm:ss');
-  let amountNow = webModel.getAmount(phone, documento);
-  await webModel.updateWallet(phone, documento, amount+amountNow[0].amount);
-  let walletId=await webModel.getIdWalletByPhone(phone, documento);
-  return webModel.addNewMov(walletId[0].id, amount+amountNow[0].amount, "charge account", 0, timestap, 1);
+  let id= await webModel.getClientIdByPhone(phone, documento);
+  console.log(id)
+  let amountNow = await webModel.getWalletByClientId(id[0].id);
+  console.log(amountNow)
+  await webModel.updateWallet(id[0].id, parseInt(amount)+parseInt(amountNow[0].monto));
+  return webModel.addNewMov(amountNow[0].id, parseInt(amount)+parseInt(amountNow[0].monto), "charge account", 0, timestap, 1);
 };
 //consultar saldo
-exports.getCash =(phone, documento) => {
-  return webModel.getAmount(phone, documento);
+exports.getCash =async(phone, documento) => {
+  var return_data={};
+  let id= await  webModel.getClientIdByPhone(phone, documento);
+  console.log(id)
+  let amountNow = await webModel.getWalletByClientId(id[0].id);
+  console.log("dinero: "+amountNow[0].monto)
+  return_data.monto=amountNow[0].monto;
+  return_data.movements= await webModel.getAllMovementsByWalletsId(amountNow[0].id);
+  return return_data;
 };
 //pagar 
 exports.newMovement = async(walletId, amount) => {
@@ -92,16 +103,19 @@ exports.newMovement = async(walletId, amount) => {
   today = yyyy + '-' + mm + '-' + dd;
   horaActual = h + ":" + m + ":" + s;
   timestap = moment(today + " " + horaActual, 'YYYY-MM-DD HH:mm:ss').tz('America/Chihuahua').format('YYYY-MM-DD HH:mm:ss');
-  var email = await webModel.getInfoByWalletId(walletId);
+  var clientId= await webModel.getWalletInfo(walletId)
+  console.log(clientId)
+  var email = await webModel.getClientByid(clientId[0].clientId);
+  console.log(email)
   var token = Math.round( Math.random() * 999999 );
   await webModel.addNewMov(walletId, amount, token, 1, timestap, 0);
-  let id = await webModel.getLastIdWallet();
+  let id = await webModel.getLastIdMovement();
   return mail.sendToken.sendEmail(
-   email[0].mail,
+   email[0].mail, 
    'Confirmacion de compra',
     email[0].name,
     token,
-    id
+    id[0].id
     );
   
    
@@ -126,7 +140,13 @@ exports.makePayment = async(token, idMovement) => {
   horaActual = h + ":" + m + ":" + s;
   timestap = moment(today + " " + horaActual, 'YYYY-MM-DD HH:mm:ss').tz('America/Chihuahua').format('YYYY-MM-DD HH:mm:ss');
   var amount = await webModel.getMovementtInfo(token, idMovement);
-  var amountNow = await webModel.getWalletInfo(amount[0].wallet_Id);
-  await webModel.updateWallet(amountNow[0].phone, amountNow[0].documento, amountNow[0].amount-amount[0].amount);
-  return webModel.updateMov(token, idMovement);
+  var amountNow = await webModel.getWalletInfo(amount[0].walletId);
+  console.log(amountNow)
+  console.log(parseInt (amountNow[0].monto) - parseInt(amount[0].movements))
+  if(parseInt (amountNow[0].monto) - parseInt(amount[0].movements)>=0){
+    await webModel.updateWalletByWalletId(amount[0].walletId, parseInt (amountNow[0].monto) - parseInt(amount[0].movements));
+    return webModel.updateMov(token, idMovement);
+  }else{
+    return webModel.updateMov();
+  }
 };

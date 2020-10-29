@@ -13,19 +13,20 @@ const app = express();
 
 //configuramos nuestra app
 app.use(compression()) // added compression
+
 app.set('views', path.join(__dirname, '..', 'views'));
 app.set('view engine', 'ejs');
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+app.use(express.static(path.join(__dirname, '..', '/public')));
 
 const PORT = process.env.port || 3000;
 const ENV = process.env.NODE_ENV || 'development';
 
 
-app.use('/api', apiRouter);
+app.use( '/api', apiRouter);
 
 app.use('/', webRouter);
 

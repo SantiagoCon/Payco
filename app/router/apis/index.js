@@ -6,6 +6,6 @@ let administrative = require('./administrative').router
 const router = Router();
 
 router.use('/user', user)
-router.use('/administrative', administrative)
+router.use( administrative)
 
 exports.router = router;

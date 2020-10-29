@@ -5,6 +5,6 @@ let userRouter = require('./user').router;
 
 const router = Router();
 
-router.use('/web', userRouter);
+router.use( userRouter);
 router.use('/administrative', administrativeRouter);
 exports.router = router;

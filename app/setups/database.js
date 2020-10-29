@@ -1,13 +1,13 @@
-let  createPool = require('promise-mysql').createPool;
-
-const mysqlPool = createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'paycol123',
-    database: 'paycol',
-    connectionLimit: 5000
-});
-
+// config/database.js
 module.exports = {
-    connectionPool: mysqlPool
+    'connection': {
+        'host': 'localhost',
+        'user': 'root',     
+        'password': 'password',
+        'connectionLimit': 100, // TODO: hacer pruebas para ver con cual funciona bien
+        'database': 'payco'
+    },
+
+    'database': 'payco'
 };
+

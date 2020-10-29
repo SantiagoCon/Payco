@@ -1,6 +1,6 @@
 var moment = require('moment-timezone');
 var nodemailer = require('nodemailer');
-const { propfind } = require('../app');
+
 
 exports.sendToken = class  {
   static sendEmail(to, subject, text, token, id) {
@@ -167,7 +167,7 @@ exports.sendToken = class  {
                       <td bgcolor="#ffffff" align="center" style="padding: 20px 30px 60px 30px;">
                         <table border="0" cellspacing="0" cellpadding="0">
                           <tr>
-                              <td align="center" style="border-radius: 3px;" bgcolor="#656c7a"><a href="http://radiall.kinnilweb.com/" target="_blank" style="font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid #656c7a; display: inline-block;">Terminar compra</a></td>
+                              <td align="center" style="border-radius: 3px;" bgcolor="#656c7a"><a href="http://localhost:3000/payFinish" target="_blank" style="font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid #656c7a; display: inline-block;">Terminar compra</a></td>
                           </tr>
                         </table>
                       </td>
