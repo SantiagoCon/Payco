@@ -1,0 +1,213 @@
+<!DOCTYPE HTML>
+<!--
+	Ion by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+
+<head>
+	<title>Payco Client</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/skel.min.js"></script>
+	<script src="js/skel-layers.min.js"></script>
+	<script src="js/init.js"></script>
+	<noscript>
+		<link rel="stylesheet" href="css/skel.css" />
+		<link rel="stylesheet" href="css/form.css" />
+		<link rel="stylesheet" href="css/style.css" />
+		<link rel="stylesheet" href="css/style-xlarge.css" />
+	</noscript>
+</head>
+
+<body id="top">
+
+	<!-- Header -->
+	<header id="header" class="skel-layers-fixed">
+		<h1><a href="#">PAYCO</a></h1>
+		<nav id="nav">
+			<ul>
+				<li><a href="home">Home</a></li>
+				<li><a href="user">Client movements</a></li>
+				<li><a href="admin">Administrator movements</a></li>
+			</ul>
+		</nav>
+	</header>
+
+	<!-- Main -->
+	<section id="main" class="wrapper style1">
+		<header class="major">
+			<h2>Client page</h2>
+			<p>See Money or make a payment</p>
+		</header>
+		<div class="container">
+			<div class="row">
+				<div class="8u">
+					<section>
+						<div class="form">
+
+							<div class="tab-content">
+								<div id="signup">
+									<h1>See Money</h1>
+									<form>
+										<div class="top-row">
+											<div class="field-wrap">
+												<label>
+													Phone<span class="req">*</span>
+												</label>
+												<input type="text" required autocomplete="off" id="tx_phone" />
+											</div>
+											<br>
+											<div class="field-wrap">
+												<label>
+													Document<span class="req">*</span>
+												</label>
+												<input type="text" required autocomplete="off" id="tx_doc" />
+											</div>
+										</div>
+										<br>
+										<button id="btn_save" type="button" class="button button-block" />Get cash</button>
+
+									</form>
+
+								</div>
+
+							</div><!-- tab-content -->
+
+						</div> <!-- /form -->
+					</section>
+				</div>
+				<div class="4u">
+					<section>
+						<h3>Make a payment</h3>
+						<p>If you need make a pay of money please click the button.</p>
+						<ul class="actions">
+							<li><a href="pay" class="button alt">Make a payment</a></li>
+						</ul>
+					</section>
+
+				</div>
+			</div>
+			<hr class="major" />
+			<div id="error" class="text-center" style="display: none;">
+				<img src="./images/ic-warning.svg" style="width: 10%">
+				<h2>Sorry we have problems, please try again.</h2>
+			</div>
+			<div id="movements" style="display:none; margin-top: 80px;">
+				<div class="row">
+					<div class="col-lg-12 col-sm-12 col-p-12">
+						<div class="p-3 mb-2 text-center bg-white text-dark">
+							<h1 id="monto"></h1>
+
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<br />
+					<div class="col-lg-12 col-sm-12">
+						<div id="tabla"></div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</section>
+
+	<!-- Footer -->
+	<footer id="footer">
+
+		<ul class="copyright">
+			<li>&copy; Untitled. All rights reserved.</li>
+			<li>Design: <a href="http://templated.co">TEMPLATED</a></li>
+			<li>Images: <a href="http://unsplash.com">Unsplash</a></li>
+		</ul>
+	</div>
+</footer>
+	<script>
+
+
+		(function (APP) {
+			APP.SERVICE = APP.SERVICE || {};
+
+			APP.SERVICE.ASSETS = APP.SERVICE.ASSETS || {};
+			APP.SERVICE.ASSETS.CREATE = APP.SERVICE.ASSETS.CREATE || function () {
+
+				var postData = {
+					phone: $("#tx_phone").val(),
+					documento: $("#tx_doc").val()
+
+				};
+
+				$.ajax({
+					url: '/api/getCash',
+					method: 'GET',
+					data: postData,
+					success: function (data) {
+
+						$('#movements').css("display", "block");
+						$('#error').css("display", "none");
+
+						window.scroll({ top: 500, left: 0, behavior: 'smooth' }); // Scroll sencillo smooth
+						$("#monto").html("cash: " + data.monto);
+
+						$('#tabla').html('');
+
+						var table = $('<table>').addClass('table table-bordered table-condensed table-hover table-striped');
+
+						for (i = 0; i < data.movements.length; i++) {
+							var row = $('<tr>').addClass('bar');
+							var td = $('<td>').text(data.movements[i].movements);
+							row.append(td);
+							if (data.movements[i].type == 1) {
+								var td2 = $('<td>').text("Pay");
+							} else {
+								var td2 = $('<td>').text(data.movements[i].descs);
+							}
+							row.append(td2);
+							var td3 = $('<td>').text(data.movements[i].timestap);
+							row.append(td3);
+							if (data.movements[i].status == 1) {
+								var td4 = $('<td>').text("Finish");
+							} else {
+								var td4 = $('<td>').text("on going");
+							}
+							row.append(td4);
+							table.append(row);
+
+						}
+
+						$('#tabla').append(table);
+						//location.reload(); // Recarga la pagina para ver el cambio
+					},
+					error: function (e, d, f) {
+						$('#movements').css("display", "none");
+						$('#error').css("display", "block");
+						window.scroll({ top: 500, left: 0, behavior: 'smooth' }); // Scroll sencillo smooth
+					}
+				});
+
+			};
+			APP.EVENTS = APP.EVENTS || {
+				BTN_SAVE: function () {
+					$('#btn_save').on('click', function () {
+						APP.SERVICE.ASSETS.CREATE();
+					});
+				},
+				INIT: function () {
+					APP.EVENTS.BTN_SAVE();
+				}
+
+			};
+			APP.addEventListener('load', function () {
+				APP.EVENTS.INIT();
+			});
+		})(window);
+
+	</script>
+</body>
+
+</html>
